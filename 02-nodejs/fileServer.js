@@ -19,7 +19,82 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const filesPath = path.join(__dirname, './files/')
 const app = express();
+
+app.get('/files', getfiles);
+
+app.get('/file/:filename', getContentOfFile);
+
+
+
+app.use(middleWare)
+
+function middleWare(req, res, next) {
+  res.status(404).send("Route not found");
+  next();
+}
+
+
+
+async function getContentOfFile(req, res) {
+  console.log("hi ra ")
+
+  const filePath = path.join(filesPath, req.params.filename)
+  console.log(filePath)
+
+  try {
+
+    const data = await new Promise((resolve, reject) => {
+      fs.readFile(filePath, 'utf-8', (err, data) => {
+        if (err)
+          reject(err);
+
+        resolve(data);
+      })
+    })
+    res.send(data);
+
+  } catch (error) {
+
+    res.status(404).send("File not found");
+
+  }
+
+
+
+
+}
+
+
+
+
+
+
+
+function getfiles(req, res) {
+
+
+  let files;
+
+  fs.readdir(filesPath, (err, data) => {
+
+    files = data
+
+    if (err) {
+      res.status(500).send(err)
+    }
+
+    res.send(files);
+
+  });
+
+}
 
 
 module.exports = app;
+
+
+
+
+
