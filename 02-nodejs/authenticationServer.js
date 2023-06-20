@@ -12,6 +12,8 @@
     Response: 201 Created if successful, or 400 Bad Request if the username already exists.
     Example: POST http://localhost:3000/signup
 
+  
+
   2. POST /login - User Login
     Description: Gets user back their details like firstname, lastname and id
     Request Body: JSON object with username and password fields.
@@ -32,6 +34,84 @@
 const express = require("express")
 const PORT = 3000;
 const app = express();
+app.use(express.json());
+
+
 // write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
 
+app.post('/signup', createAccount)
+app.post('/login', login)
+
+app.get('/data', getData)
+
 module.exports = app;
+
+const users = []
+
+function createAccount(req, res) {
+  const { email, password, firstName, lastName } = req.body;
+  console.log(req.body);
+
+  const user = users.filter((user) => { return user.email === email });
+
+  if (user.length !== 0)
+    res.status(401).send('message')
+  users.push({ id: users.length, email, password, firstName, lastName });
+
+  res.status(201).send("Signup successful")
+
+}
+
+function login(req, res) {
+
+  const { email, password } = req.body;
+
+  const user = users.filter((user) => { return user.email === email });
+
+
+  if (user.length === 0)
+    res.status(401).send('Unauthorized');
+
+
+
+
+  if (user[0].password !== password)
+    res.status(401).send('Unauthorized');
+
+  res.send({ email, firstName: user[0].firstName, lastName: user[0].lastName });
+
+
+}
+
+
+function getData(req, res) {
+
+
+  const { email, password } = req.headers;
+
+  console.log(req.headers)
+
+  const user = users.filter((user) => { return user.email === email });
+
+
+  if (user.length === 0)
+    res.status(401).send('Unauthorized');
+
+
+
+  if (user[0].password !== password)
+    res.status(401).send('Unauthorized');
+
+  const list = [];
+
+  for (let i = 0; i < users.length; i++) {
+    const { email, firstName, lastName } = users[i];
+    list.push({ email, firstName, lastName })
+
+  }
+
+  res.send({ "users": list });
+
+
+
+}
